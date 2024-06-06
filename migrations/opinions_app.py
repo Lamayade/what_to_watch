@@ -1,3 +1,6 @@
+import csv
+import click
+
 from datetime import datetime, timezone
 from random import randrange
 
@@ -86,6 +89,20 @@ def add_opinion_view():
 def opinion_view(id):
     opinion = Opinion.query.get_or_404(id)
     return render_template('opinion.html', opinion=opinion)
+
+
+@app.cli.command('load_opinions')
+def load_opinions_command():
+    """Функция загрузки мнений в базу данных"""
+    with open('opinions.csv', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        counter = 0
+        for row in reader:
+            opinion = Opinion(**row)
+            db.session.add(opinion)
+            db.session.commit()
+            counter += 1
+    click.echo(f'Загружено мнений: {counter}')
 
 
 if __name__ == '__main__':
